@@ -9,14 +9,14 @@ from data import insert_historical, upsert_latest
 
 logging.basicConfig(filename='log', level=logging.INFO)
 # 实际主网合约地址请替换
-PANCAKE_PAIR = Web3.to_checksum_address('0x84354592cb82EAc7fac65df4478ED1eEbBa0252c')
+PANCAKE_PAIR = Web3.to_checksum_address('0xBe141893E4c6AD9272e8C04BAB7E6a10604501a5')
 QUOTE_TOKEN_PANCAKE = Web3.to_checksum_address('0x55d398326f99059fF775485246999027B3197955')  # USDT on BSC
 
-UNISWAP_PAIR = Web3.to_checksum_address('0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8')
+UNISWAP_PAIR = Web3.to_checksum_address('0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36')
 QUOTE_TOKEN_UNISWAP = Web3.to_checksum_address('0xdAC17F958D2ee523a2206206994597C13D831ec7')  # USDT on Ethereum
 
-AERO_PAIR = Web3.to_checksum_address('0xE6C694f8B9EE84353a10de59c9b4cDEFa0F5b4Ad')
-QUOTE_TOKEN_AERODROME = Web3.to_checksum_address('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')  # USDT on Base
+AERO_PAIR = Web3.to_checksum_address('0x9785ef59e2b499fb741674ecf6faf912df7b3c1b')
+QUOTE_TOKEN_AERODROME = Web3.to_checksum_address('0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2')  # USDT on Base
 
 def main():
     pancake = PancakeV3Dex(PANCAKE_PAIR, quote_token_address=QUOTE_TOKEN_PANCAKE)
