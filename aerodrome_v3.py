@@ -97,10 +97,10 @@ class AerodromeV3Dex(DexBase):
         return receipt
 
 
-if __name__ == "__main__":
-    pair_address = Web3.to_checksum_address('0xE6C694f8B9EE84353a10de59c9b4cDEFa0F5b4Ad') # replace with actual 
-    amount_in = 10 ** 5 # example amount
-    token_in_is0 = True
-    dex = AerodromeV3Dex(pair_address)
-    dex.get_price()
-    dex.swap(amount_in, token_in_is0, amount_out_min=0)
+# if __name__ == "__main__":
+#     pair_address = Web3.to_checksum_address('0xE6C694f8B9EE84353a10de59c9b4cDEFa0F5b4Ad') # replace with actual 
+#     amount_in = 10 ** 5 # example amount
+#     token_in_is0 = True
+#     dex = AerodromeV3Dex(pair_address)
+#     dex.get_price()
+#     dex.swap(amount_in, token_in_is0, amount_out_min=0)

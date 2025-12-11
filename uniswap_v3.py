@@ -110,18 +110,18 @@ class UniswapV3Dex(DexBase):
             logging.info("Swap transaction failed!")
         return receipt
 
-# 主测试函数，放在类定义之外
-if __name__ == "__main__":
-    # 示例地址，请替换为实际 Uniswap V3 合约地址
-    test_pair_address = Web3.to_checksum_address('0x65F53f9edF81B6b4b2a7d40C3Ca56054D4c93b9A')
-    test_amount_in = 10 ** 5  # 示例数量
-    test_token_in_is0 = False
-    test_amount_out_min = 0
-    test_sqrt_price_limit_x96 = 0
-    dex = UniswapV3Dex(test_pair_address)
-    logging.info("Testing get_price:")
-    current_price = dex.get_price()
-    logging.info(f"Current price: {current_price}")
-    logging.info("Testing swap:")
-    swap_receipt = dex.swap(test_amount_in, test_token_in_is0, test_amount_out_min, test_sqrt_price_limit_x96)
-    logging.info(f"Swap receipt: {swap_receipt}")
+# # 主测试函数，放在类定义之外
+# if __name__ == "__main__":
+#     # 示例地址，请替换为实际 Uniswap V3 合约地址
+#     test_pair_address = Web3.to_checksum_address('0x65F53f9edF81B6b4b2a7d40C3Ca56054D4c93b9A')
+#     test_amount_in = 10 ** 5  # 示例数量
+#     test_token_in_is0 = False
+#     test_amount_out_min = 0
+#     test_sqrt_price_limit_x96 = 0
+#     dex = UniswapV3Dex(test_pair_address)
+#     logging.info("Testing get_price:")
+#     current_price = dex.get_price()
+#     logging.info(f"Current price: {current_price}")
+#     logging.info("Testing swap:")
+#     swap_receipt = dex.swap(test_amount_in, test_token_in_is0, test_amount_out_min, test_sqrt_price_limit_x96)
+#     logging.info(f"Swap receipt: {swap_receipt}")

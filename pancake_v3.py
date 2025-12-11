@@ -96,17 +96,17 @@ class PancakeV3Dex(DexBase):
             logging.info("Swap transaction failed!")
         return receipt
 
-if __name__ == "__main__":
-    # 示例地址，请替换为实际 Pancake V3 合约地址
-    pair_address = Web3.to_checksum_address('0x84354592cb82EAc7fac65df4478ED1eEbBa0252c')
-    amount_in = 10 ** 13  # 示例数量
-    token_in_is0 = True
-    amount_out_min = 0
-    sqrt_price_limit_x96 = 0
-    dex = PancakeV3Dex(pair_address)
-    logging.info("Testing get_price:")
-    price = dex.get_price()
-    logging.info(f"Current price: {price}")
-    logging.info("Testing swap:")
-    receipt = dex.swap(amount_in, token_in_is0, amount_out_min, sqrt_price_limit_x96)
-    logging.info(f"Swap receipt: {receipt}")
+# if __name__ == "__main__":
+#     # 示例地址，请替换为实际 Pancake V3 合约地址
+#     pair_address = Web3.to_checksum_address('0x84354592cb82EAc7fac65df4478ED1eEbBa0252c')
+#     amount_in = 10 ** 13  # 示例数量
+#     token_in_is0 = True
+#     amount_out_min = 0
+#     sqrt_price_limit_x96 = 0
+#     dex = PancakeV3Dex(pair_address)
+#     logging.info("Testing get_price:")
+#     price = dex.get_price()
+#     logging.info(f"Current price: {price}")
+#     logging.info("Testing swap:")
+#     receipt = dex.swap(amount_in, token_in_is0, amount_out_min, sqrt_price_limit_x96)
+#     logging.info(f"Swap receipt: {receipt}")
