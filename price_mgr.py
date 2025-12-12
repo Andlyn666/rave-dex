@@ -49,7 +49,7 @@ def main():
             mark_price, index_price, funding_rate = get_latest_funding_rate('RAVEUSDT')
             spot_price = get_latest_price_spot('RAVEUSDT')
             upsert_penrose_cex_latest(
-                6, 'RAVEUSDT', spot_price, index_price, mark_price, funding_rate, now
+                6, 'RAVE', spot_price, index_price, mark_price, funding_rate, now
             )
             insert_rave_cex_history(
                 6, spot_price, index_price, mark_price, funding_rate, now
