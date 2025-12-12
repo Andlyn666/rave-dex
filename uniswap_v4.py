@@ -36,10 +36,10 @@ class PancakeV4Dex:
         if self.quote_token_address == self.token0:
             price_inv = 1 / price if price != 0 else 0
             logging.info(f"Current price (base token per quote token): {price_inv}")
-            return price_inv
+            return round(price_inv, 6)
         else:
             logging.info(f"Current price (quote token per base token): {price}")
-            return price
+            return round(price, 6)
 
 # if __name__ == "__main__":
 #     # 示例地址，请替换为实际 Pancake V3 合约地址

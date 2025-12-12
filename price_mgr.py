@@ -5,7 +5,9 @@ from web3 import Web3
 from pancake_v4 import PancakeV4Dex
 from uniswap_v3 import UniswapV3Dex
 from aerodrome_v3 import AerodromeV3Dex
-from data import insert_historical, upsert_latest
+from data import insert_historical, upsert_latest, insert_rave_cex_history, upsert_penrose_cex_latest
+from aster_future import get_latest_funding_rate
+from aster_spot import get_latest_price_spot
 
 logging.basicConfig(filename='log', level=logging.INFO)
 # 实际主网合约地址请替换
@@ -30,20 +32,32 @@ def main():
             insert_historical(0, price_pancake, now)
             upsert_latest(0, price_pancake, now)
         except Exception as e:
-            logging.info(f"PancakeV3Dex error: {e}")
+            logging.info("PancakeV3Dex error: %s", e)
         try:
             price_uniswap = uniswap.get_price()
             insert_historical(1, price_uniswap, now)
             upsert_latest(1, price_uniswap, now)
         except Exception as e:
-            logging.info(f"UniswapV3Dex error: {e}")
+            logging.info("UniswapV3Dex error: %s", e)
         try:
             price_aero = aerodrome.get_price()
             insert_historical(2, price_aero, now)
             upsert_latest(2, price_aero, now)
         except Exception as e:
-            logging.info(f"AerodromeV3Dex error: {e}")
-        time.sleep(5)
+            logging.info("AerodromeV3Dex error: %s", e)
+        try:
+            mark_price, index_price, funding_rate = get_latest_funding_rate('RAVEUSDT')
+            spot_price = get_latest_price_spot('RAVEUSDT')
+            upsert_penrose_cex_latest(
+                6, 'RAVEUSDT', spot_price, index_price, mark_price, funding_rate, now
+            )
+            insert_rave_cex_history(
+                6, spot_price, index_price, mark_price, funding_rate, now
+            )
+        except Exception as e:
+            logging.info("Error fetching funding rate or spot price: %s", e)
+
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()

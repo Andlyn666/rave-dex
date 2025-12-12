@@ -35,9 +35,11 @@ class PancakeV4Dex:
         # 如果quote token是token0，返回price（token1 per token0）；否则返回倒数（token0 per token1）
         if self.quote_token_address == self.token0:
             price_inv = 1 / price if price != 0 else 0
+            price_inv = round(price_inv, 6)
             logging.info(f"Current price (base token per quote token): {price_inv}")
             return price_inv
         else:
+            price = round(price, 6)
             logging.info(f"Current price (quote token per base token): {price}")
             return price
 

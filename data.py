@@ -37,3 +37,41 @@ def upsert_latest(dex_type, price, created_at):
     conn.commit()
     cur.close()
     conn.close()
+
+def upsert_penrose_cex_latest(cex, symbol, spot_price, index_price, mark_price, funding_rate, timestamp):
+    conn = get_conn()
+    cur = conn.cursor()
+    sql = """
+        INSERT INTO penrose_cex_latest (
+            cex, symbol, spot_price, index_price, mark_price, funding_rate, timestamp
+        ) VALUES (
+            %s, %s, %s, %s, %s, %s, %s
+        )
+        ON CONFLICT (cex, symbol)
+        DO UPDATE SET
+            spot_price = EXCLUDED.spot_price,
+            index_price = EXCLUDED.index_price,
+            mark_price = EXCLUDED.mark_price,
+            funding_rate = EXCLUDED.funding_rate,
+            timestamp = EXCLUDED.timestamp;
+    """
+    cur.execute(sql, (cex, symbol, spot_price, index_price, mark_price, funding_rate, timestamp))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def insert_rave_cex_history(cex, spot_price, index_price, mark_price, funding_rate, timestamp):
+    conn = get_conn()
+    cur = conn.cursor()
+    sql = """
+        INSERT INTO rave_cex_history (
+            cex, spot_price, index_price, mark_price, funding_rate, timestamp
+        ) VALUES (
+            %s, %s, %s, %s, %s, %s
+        )
+    """
+    cur.execute(sql, (cex, spot_price, index_price, mark_price, funding_rate, timestamp))
+    conn.commit()
+    cur.close()
+    conn.close()
+

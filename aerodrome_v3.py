@@ -44,10 +44,10 @@ class AerodromeV3Dex(DexBase):
         if self.quote_token_address == self.token0:
             price_inv = 1 / price if price != 0 else 0
             logging.info(f"Current price (quote token per base token): {price_inv}")
-            return price_inv
+            return round(price_inv, 6)
         else:
             logging.info(f"Current price (base token per quote token): {price}")
-            return price
+            return round(price, 6)
 
     def swap(self, amount_in, token_in_is0, amount_out_min=0, sqrt_price_limit_x96=0):
         token_in = self.token0 if token_in_is0 else self.token1
