@@ -9,20 +9,20 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-class PancakeV4Dex:
+class UniswapV4Dex:
     def __init__(self, pair_id, pool_mgr_address, quote_token_address='0xdAC17F958D2ee523a2206206994597C13D831ec7'):
         self.pair_id = pair_id
         self.pool_mgr_address = pool_mgr_address
         self.quote_token_address = Web3.to_checksum_address(quote_token_address)
         self.web3 = Web3(Web3.HTTPProvider(os.environ.get('ETH_RPC')))
         self.web3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
-        with open('abi/v4_pool_mgr_abi.json') as f:
+        with open('abi/v4_state_view_abi.json') as f:
             V4_POOL_MGR_ABI = json.load(f)
         with open('abi/erc20_abi.json') as f:
             ERC20_ABI = json.load(f)
         self.pool_mgr = self.web3.eth.contract(address=pool_mgr_address, abi=V4_POOL_MGR_ABI)
-        self.token0 = quote_token_address
-        self.token1 = "0x97693439EA2f0ecdeb9135881E49f354656a911c"
+        self.token0 = "0x97693439EA2f0ecdeb9135881E49f354656a911c"
+        self.token1 = quote_token_address
         self.token0_contract = self.web3.eth.contract(address=self.token0, abi=ERC20_ABI)
         self.token1_contract = self.web3.eth.contract(address=self.token1, abi=ERC20_ABI)
         self.token0_decimals = self.token0_contract.functions.decimals().call()
