@@ -46,7 +46,7 @@ def main():
         except Exception as e:
             logging.info("AerodromeV3Dex error: %s", e)
         try:
-            mark_price, index_price, funding_rate = get_latest_funding_rate('RAVEUSD1')
+            mark_price, index_price, funding_rate = get_latest_funding_rate('RAVEUSDT')
             spot_price = get_latest_price_spot('RAVEUSD1')
             logging.info(f"Fetched funding rate: {funding_rate}, spot price: {spot_price}")
             upsert_penrose_cex_latest(
