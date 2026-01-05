@@ -58,7 +58,7 @@ def main():
         except Exception as e:
             logging.info("Error fetching funding rate or spot price: %s", e)
 
-        time.sleep(60)
+        time.sleep(5)
 
 if __name__ == "__main__":
     main()
