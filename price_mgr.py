@@ -8,6 +8,7 @@ from aerodrome_v3 import AerodromeV3Dex
 from data import insert_historical, upsert_latest, insert_rave_cex_history, upsert_penrose_cex_latest
 from aster_future import get_latest_funding_rate
 from aster_spot import get_latest_price_spot
+from fetch_kline_volume import run_daily_kline_volume_fetch
 
 logging.basicConfig(filename='log', level=logging.INFO)
 # 实际主网合约地址请替换
@@ -24,9 +25,17 @@ def main():
     pancake = PancakeV4Dex(PANCAKE_ID, PANCAKE_MGR)
     uniswap = UniswapV4Dex(UNISWAP_ID, UNISWAP_STATE_VIEW)
     aerodrome = AerodromeV3Dex(AERO_PAIR, quote_token_address=QUOTE_TOKEN_AERODROME)
+    last_kline_fetch_date = None
 
     while True:
         now = datetime.datetime.now()
+        # Run kline volume fetch once per day
+        if last_kline_fetch_date != now.date():
+            try:
+                run_daily_kline_volume_fetch()
+                last_kline_fetch_date = now.date()
+            except Exception as e:
+                logging.info("Daily kline volume fetch error: %s", e)
         try:
             price_pancake = pancake.get_price()
             insert_historical(0, price_pancake, now)
