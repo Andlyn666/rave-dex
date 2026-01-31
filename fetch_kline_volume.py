@@ -151,14 +151,18 @@ def get_klines_alpha(symbol: str, interval: str = '1d', start_time: Optional[int
         raise
 
 
-def insert_kline_volume(conn, token_pair: str, volume: str, open_time: int, close_time: int, data_type: str):
+def insert_kline_volume(conn, token_pair: str, volume: str, quote_volume: str, open_price: str,
+                       close_price: str, open_time: int, close_time: int, data_type: str):
     """
     Insert K-line volume data into database.
-    
+
     Args:
         conn: Database connection
         token_pair: Trading pair symbol
         volume: Volume value as string
+        quote_volume: Quote asset volume as string
+        open_price: Open price as string
+        close_price: Close price as string
         open_time: Open time in milliseconds
         close_time: Close time in milliseconds
         data_type: Data source type ('aster_spot', 'aster_future', 'alpha')
@@ -166,16 +170,23 @@ def insert_kline_volume(conn, token_pair: str, volume: str, open_time: int, clos
     # Convert milliseconds to PostgreSQL TIMESTAMPTZ
     open_time_ts = datetime.fromtimestamp(open_time / 1000)
     close_time_ts = datetime.fromtimestamp(close_time / 1000)
-    
+
     cur = conn.cursor()
     try:
         insert_sql = """
-            INSERT INTO token_pair_volume_hourly (token_pair, type, volume, open_time, close_time)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO token_pair_volume_hourly (
+                token_pair, type, volume, quote_volume, open_price, close_price, open_time, close_time
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (token_pair, type, open_time) DO UPDATE
-            SET volume = EXCLUDED.volume, close_time = EXCLUDED.close_time
+            SET volume = EXCLUDED.volume, quote_volume = EXCLUDED.quote_volume,
+                open_price = EXCLUDED.open_price, close_price = EXCLUDED.close_price,
+                close_time = EXCLUDED.close_time
         """
-        cur.execute(insert_sql, (token_pair, data_type, volume, open_time_ts, close_time_ts))
+        cur.execute(insert_sql, (
+            token_pair, data_type, volume, quote_volume, open_price, close_price,
+            open_time_ts, close_time_ts
+        ))
         conn.commit()
         logging.debug("Inserted/Updated: %s (%s) at %s", token_pair, data_type, open_time_ts)
     except psycopg2.Error as e:
@@ -186,21 +197,24 @@ def insert_kline_volume(conn, token_pair: str, volume: str, open_time: int, clos
         cur.close()
 
 
-def _normalize_kline_fields(kline: List) -> tuple[int, int, str]:
+def _normalize_kline_fields(kline: List) -> tuple[int, int, str, str, str, str]:
     """
     Normalize kline fields across providers.
 
-    Expected formats:
-    - Aster spot/future: [open_time(ms:int), ..., volume(str), close_time(ms:int), ...]
-    - Alpha:            [open_time(ms:str), ..., volume(str), close_time(ms:str), ...]
+    Kline format: [open_time, open_price, high, low, close_price, volume, close_time, quote_volume, ...]
     """
     open_time_raw = kline[0]
     close_time_raw = kline[6]
-    volume = kline[5]
+    open_price = kline[1] if isinstance(kline[1], str) else str(kline[1])
+    close_price = kline[4] if isinstance(kline[4], str) else str(kline[4])
+    volume = kline[5] if isinstance(kline[5], str) else str(kline[5])
+    quote_volume = kline[7] if len(kline) > 7 else '0'
+    if not isinstance(quote_volume, str):
+        quote_volume = str(quote_volume)
 
     open_time_ms = int(open_time_raw) if isinstance(open_time_raw, str) else open_time_raw
     close_time_ms = int(close_time_raw) if isinstance(close_time_raw, str) else close_time_raw
-    return open_time_ms, close_time_ms, volume
+    return open_time_ms, close_time_ms, volume, quote_volume, open_price, close_price
 
 
 def _fetch_and_store_volume_range(
@@ -228,8 +242,8 @@ def _fetch_and_store_volume_range(
 
             last_open_time_ms = None
             for kline in klines_sorted:
-                open_time_ms, close_time_ms, volume = _normalize_kline_fields(kline)
-                insert_kline_volume(conn, symbol, volume, open_time_ms, close_time_ms, data_type)
+                open_time_ms, close_time_ms, volume, quote_volume, open_price, close_price = _normalize_kline_fields(kline)
+                insert_kline_volume(conn, symbol, volume, quote_volume, open_price, close_price, open_time_ms, close_time_ms, data_type)
                 last_open_time_ms = open_time_ms
 
             if last_open_time_ms is None:
@@ -281,12 +295,8 @@ def fetch_and_store_volume_aster_spot(symbol: str, interval: str = '1h', days_ba
         try:
             # Insert each kline
             for kline in klines:
-                # Kline format: [open_time, open, high, low, close, volume, close_time, ...]
-                open_time_ms = kline[0]
-                volume = kline[5]  # Volume at index 5
-                close_time_ms = kline[6]  # Close time at index 6
-                
-                insert_kline_volume(conn, symbol, volume, open_time_ms, close_time_ms, 'aster_spot')
+                open_time_ms, close_time_ms, volume, quote_volume, open_price, close_price = _normalize_kline_fields(kline)
+                insert_kline_volume(conn, symbol, volume, quote_volume, open_price, close_price, open_time_ms, close_time_ms, 'aster_spot')
             
             logging.info("Successfully stored %d klines for %s", len(klines), symbol)
         finally:
@@ -329,12 +339,8 @@ def fetch_and_store_volume_aster_future(symbol: str, interval: str = '1d', days_
         try:
             # Insert each kline
             for kline in klines:
-                # Kline format: [open_time, open, high, low, close, volume, close_time, ...]
-                open_time_ms = kline[0]
-                volume = kline[5]  # Volume at index 5
-                close_time_ms = kline[6]  # Close time at index 6
-                
-                insert_kline_volume(conn, symbol, volume, open_time_ms, close_time_ms, 'aster_future')
+                open_time_ms, close_time_ms, volume, quote_volume, open_price, close_price = _normalize_kline_fields(kline)
+                insert_kline_volume(conn, symbol, volume, quote_volume, open_price, close_price, open_time_ms, close_time_ms, 'aster_future')
             
             logging.info("Successfully stored %d futures klines for %s", len(klines), symbol)
         finally:
@@ -377,13 +383,8 @@ def fetch_and_store_volume_alpha(symbol: str, interval: str = '1d', days_back: i
         try:
             # Insert each kline
             for kline in klines:
-                # Kline format: [open_time, open, high, low, close, volume, close_time, ...]
-                # Note: Alpha API returns strings, need to convert open_time and close_time
-                open_time_ms = int(kline[0]) if isinstance(kline[0], str) else kline[0]
-                volume = kline[5]  # Volume at index 5
-                close_time_ms = int(kline[6]) if isinstance(kline[6], str) else kline[6]
-                
-                insert_kline_volume(conn, symbol, volume, open_time_ms, close_time_ms, 'alpha')
+                open_time_ms, close_time_ms, volume, quote_volume, open_price, close_price = _normalize_kline_fields(kline)
+                insert_kline_volume(conn, symbol, volume, quote_volume, open_price, close_price, open_time_ms, close_time_ms, 'alpha')
             
             logging.info("Successfully stored %d alpha klines for %s", len(klines), symbol)
         finally:

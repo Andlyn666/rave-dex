@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS token_pair_volume_hourly (
     token_pair VARCHAR(128) NOT NULL,
     type VARCHAR(32) NOT NULL,
     volume NUMERIC NOT NULL,
+    quote_volume NUMERIC NOT NULL,
+    open_price NUMERIC NOT NULL,
+    close_price NUMERIC NOT NULL,
     open_time TIMESTAMPTZ NOT NULL,
     close_time TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (token_pair, type, open_time)
